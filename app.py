@@ -9,17 +9,22 @@ def decode_xor(data):
 @app.route('/decode', methods=['POST'])
 def decode():
 
+    if 'file' not in request.files:
+        return "missing file", 400
+
     f = request.files['file']
 
     raw = f.read()
 
     decoded = decode_xor(raw)
 
-    lz4_data = decoded[8:]
+    xml = lz4.block.decompress(decoded)
 
-    xml = lz4.block.decompress(lz4_data)
+    return Response(xml, mimetype='application/xml')
 
-    return Response(xml, mimetype='text/xml')
+@app.route('/')
+def home():
+    return 'OK'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
